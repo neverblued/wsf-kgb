@@ -18,7 +18,8 @@
         (or new-life max-auth-cookie-life)))
 
 (defun auth-period (subject)
-  (reduce #'min (mapcar #'auth-cookie-life (kgb::groups subject))))
+  (reduce #'min (mapcar #'auth-cookie-life
+                        (kgb:communities subject))))
 
 (defun set-auth-cookie (user)
   (set-cookie auth-cookie-name

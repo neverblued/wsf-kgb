@@ -4,8 +4,9 @@
 
 (in-package #:wsf)
 
-(defclass secure-http-server (http-server) ())
-(defclass secure-website (secure-http-server website) ())
+(defclass secure-server (database-server) ())
+(defclass secure-http-server (secure-server http-server) ())
+(defclass secure-website (secure-server website) ())
 
 (defmethod respond ((server secure-http-server) request)
   (with-authentication request (call-next-method)))
