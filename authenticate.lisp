@@ -2,18 +2,28 @@
 ;; Допускаю использование и распространение согласно
 ;; LLGPL -> http://opensource.franz.com/preamble.html
 
-(in-package #:wsf)
+(in-package #:wsf-kgb)
+
+(defmethod guest-alias ((request request))
+  nil)
+
+(defmethod guest-password ((request request))
+  (get-session-id))
+
+(defun request-credentials (request)
+  (with-accessors ((alias kgb::alias)
+                   (password kgb::password))
+      request
+    (when (and alias password)
+      (alias+password alias password))))
 
 (defmethod authenticate ((request request))
+  (aif (request-credentials request)
+       (authenticate it)
+       (awhen (authentication-cookie)
+         (seal-person it))))
+
+(defmethod authenticate :around ((request request))
   (let ((*request* request))
     (start-session)
-    (awhen (cookie-in auth-cookie-name)
-      (kgb::seal-person it))))
-
-(defmethod kgb::guest-password ((request request))
-  (session-cookie-value *session*))
-
-(defmethod kgb::introduce-guest :around ((request request))
-  (let ((guest (call-next-method)))
-    (set-auth-cookie guest)
-    guest))
+    (call-next-method)))

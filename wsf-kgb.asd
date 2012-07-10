@@ -11,9 +11,10 @@
   :description "Web Site Framework security module"
   :version "0.1"
   :author "Дмитрий Пинский <demetrius@neverblued.info>"
-  :depends-on (#:wsf-pg #:kgb)
+  :depends-on (#:wsf #:kgb)
   :serial t
   :components ((:file "package")
                (:file "server")
+               (:file "model")
                (:file "http")
                (:file "authenticate")))

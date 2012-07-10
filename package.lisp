@@ -3,11 +3,18 @@
 ;; LLGPL -> http://opensource.franz.com/preamble.html
 
 (defpackage #:wsf-kgb
-  (:use #:cl #:hunchentoot #:kgb)
+  (:use #:cl #:wsf #:kgb #:hunchentoot #:blackjack)
   (:export
                                         ; server
-   #:secure-http-server #:secure-website
+   #:secure-server
+   #:secure-http-server
+   #:secure-website
                                         ; http
-   #:auth-cookie-life #:kill-auth-cookie #:set-auth-cookie
-
+   #:authentication-cookie-name
+   #:max-authentication-cookie-life
+   #:authentication-cookie-life
+   #:authentication-period
+   #:authentication-cookie
+   #:kill-authentication-cookie
+                                        ; .
    ))

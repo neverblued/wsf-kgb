@@ -2,11 +2,17 @@
 ;; Допускаю использование и распространение согласно
 ;; LLGPL -> http://opensource.franz.com/preamble.html
 
-(in-package #:wsf)
+(in-package #:wsf-kgb)
 
-(defclass secure-server (database-server) ())
-(defclass secure-http-server (secure-server http-server) ())
-(defclass secure-website (secure-server website) ())
+(defclass secure-server () ())
 
-(defmethod respond ((server secure-http-server) request)
+(defclass secure-http-server (http-server secure-server) ())
+(defclass secure-website (website secure-server) ())
+
+(defmethod respond :around ((server secure-server) request)
   (with-authentication request (call-next-method)))
+
+(defmethod request-user :around ((request request))
+  (awith (call-next-method)
+    (setf (authentication-cookie) it)
+    it))

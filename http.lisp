@@ -2,33 +2,53 @@
 ;; Допускаю использование и распространение согласно
 ;; LLGPL -> http://opensource.franz.com/preamble.html
 
-(in-package #:wsf)
+(in-package #:wsf-kgb)
 
-(defparameter auth-cookie-name "authentication-seal")
+;; session
 
-(defparameter max-auth-cookie-life (* 365 24 60 60))
+(defmethod session-cookie-name ((acceptor wsf::acceptor))
+  "session-id")
 
-(defvar auth-cookie-life (make-hash-table))
+(defun get-session-id ()
+  (session-id *session*))
 
-(defun auth-cookie-life (subject)
-  (gethash subject auth-cookie-life max-auth-cookie-life))
+;; cookie life
 
-(defun (setf auth-cookie-life) (new-life subject)
-  (setf (gethash subject auth-cookie-life)
-        (or new-life max-auth-cookie-life)))
+(defparameter max-authentication-cookie-life
+  (* 365 24 60 60))
 
-(defun auth-period (subject)
-  (reduce #'min (mapcar #'auth-cookie-life
-                        (kgb:communities subject))))
+(defvar authentication-cookie-life
+  (make-hash-table))
 
-(defun set-auth-cookie (user)
-  (set-cookie auth-cookie-name
+(defun authentication-cookie-life (subject)
+  (gethash subject authentication-cookie-life max-authentication-cookie-life))
+
+(defun (setf authentication-cookie-life) (new-life subject)
+  (setf (gethash subject authentication-cookie-life)
+        (or new-life max-authentication-cookie-life)))
+
+(defun authentication-period (subject)
+  (aif (communities subject)
+       (reduce #'min (mapcar #'authentication-cookie-life it))
+       100500))
+
+;; cookie
+
+(defparameter authentication-cookie-name
+  "authentication-seal")
+
+(defun authentication-cookie ()
+  (cookie-in authentication-cookie-name))
+
+(defun (setf authentication-cookie) (user)
+  (set-cookie authentication-cookie-name
               :value (kgb::seal user)
-              :expires (+ (get-universal-time) (auth-period user))
+              :expires (+ (get-universal-time)
+                          (authentication-period user))
               :path "/"))
 
-(defun kill-auth-cookie ()
-  (set-cookie auth-cookie-name
+(defun kill-authentication-cookie ()
+  (set-cookie authentication-cookie-name
               :value ""
               :expires 0
               :path "/"))
