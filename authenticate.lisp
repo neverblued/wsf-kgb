@@ -4,19 +4,6 @@
 
 (in-package #:wsf-kgb)
 
-(defmethod guest-alias ((request request))
-  nil)
-
-(defmethod guest-password ((request request))
-  (get-session-id))
-
-(defun request-credentials (request)
-  (with-accessors ((alias kgb::alias)
-                   (password kgb::password))
-      request
-    (when (and alias password)
-      (alias+password alias password))))
-
 (defmethod authenticate ((request request))
   (aif (request-credentials request)
        (authenticate it)
@@ -25,5 +12,4 @@
 
 (defmethod authenticate :around ((request request))
   (let ((*request* request))
-    (start-session)
     (call-next-method)))

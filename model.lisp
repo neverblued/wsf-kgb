@@ -6,7 +6,16 @@
 
 (defmethod kgb::alias ((request request))
   (or (post-parameter "alias" request)
-      (get-session-id)))
+      (progn (assert-session)
+             (get-session-id))))
 
 (defmethod kgb::password ((request request))
   (post-parameter "password" request))
+
+(defmethod guest-alias ((request request))
+  nil)
+
+(defmethod guest-password ((request request))
+  (handler-case (get-session-id)
+    (error ()
+      (call-next-method))))
